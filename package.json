@@ -1,0 +1,11 @@
+{
+  "name": "api-tockets",
+  "version": "1.0.0",
+  "description": "aAPI de tickets internos",
+  "types": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js"
+  }
+
+}
