@@ -3,7 +3,6 @@ const path = require("path");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Configurar motor de plantillas EJS
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "../views"));
 
@@ -42,9 +41,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// --- RUTAS VISTAS (HTML) ---
-
-// 1. Tabla principal de tickets (Soporta filtro por query param ?estado=)
+// 1. Tabla principal
 app.get("/", (req, res) => {
   const { estado } = req.query;
   let ticketsAmostrar = tickets;
@@ -61,7 +58,7 @@ app.get("/", (req, res) => {
   });
 });
 
-// 2. Vista HTML de detalle de un ticket (Etapa C)
+// 2. Vista HTML de detalle de un ticket
 app.get("/tickets/:id/ver", (req, res) => {
   const { id } = req.params;
   const ticket = tickets.find((t) => t.id === parseInt(id));
@@ -69,9 +66,7 @@ app.get("/tickets/:id/ver", (req, res) => {
   res.render("detalle", { ticket, idBuscado: id });
 });
 
-// --- RUTAS API REST (JSON) ---
-
-// Obtener tickets en JSON (con filtro opcional ?estado=)
+// Obtener tickets
 app.get("/tickets", (req, res) => {
   const { estado } = req.query;
 
@@ -99,14 +94,13 @@ app.get("/tickets/:id", (req, res, next) => {
   res.json(ticket);
 });
 
-// Manejo de rutas no encontradas (404)
 app.use((req, res, next) => {
   const error = new Error("Ruta no encontrada");
   error.status = 404;
   next(error);
 });
 
-// Middleware de errores centralizado
+// errores
 app.use((err, req, res, next) => {
   const status = err.status || 500;
   res.status(status).json({
