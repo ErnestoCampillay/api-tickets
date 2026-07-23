@@ -19,6 +19,7 @@
                 <th>ID</th>
                 <th>Título</th>
                 <th>Estado</th>
+                <th>Prioridad</th>
                 <th>Acciones</th>
             </tr>
         </thead>
@@ -28,6 +29,7 @@
                     <td><%= ticket.id %></td>
                     <td><%= ticket.titulo %></td>
                     <td><%= ticket.estado %></td>
+                    <td><%= ticket.prioridad %></td>
                     <td><a href="/tickets/<%= ticket.id %>/ver">Ver Detalle</a></td>
                 </tr>
             <% }) %>
