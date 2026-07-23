@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Detalle del Ticket</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 30px;
+        background-color: #f4f4f9;
+      }
+      .card {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        max-width: 500px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+      .not-found {
+        color: #d9534f;
+        background: #fdf2f2;
+        border: 1px solid #f5c6cb;
+        padding: 15px;
+        border-radius: 5px;
+      }
+      a {
+        display: inline-block;
+        margin-top: 15px;
+        color: #007bff;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <% if (ticket) { %>
+    <div class="card">
+      <h1>🎫 Detalle del Ticket #<%= ticket.id %></h1>
+      <p><strong>Título:</strong> <%= ticket.titulo %></p>
+      <p><strong>Estado:</strong> <%= ticket.estado %></p>
+      <p><strong>Prioridad:</strong> <%= ticket.prioridad %></p>
+      <a href="/">← Volver a la lista</a>
+    </div>
+    <% } else { %>
+    <div class="card not-found">
+      ⚠️ <strong>Ticket no encontrado</strong>
+      <p>No existe ningún ticket registrado con el ID <%= idBuscado %>.</p>
+      <a href="/">← Volver a la lista</a>
+    </div>
+    <% } %>
+  </body>
+</html>

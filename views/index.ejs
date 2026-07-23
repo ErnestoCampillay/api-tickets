@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sistema de Tickets</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 30px;
+        background-color: #f4f4f9;
+      }
+      h1 {
+        color: #333;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        margin-top: 20px;
+      }
+      th,
+      td {
+        padding: 12px;
+        border: 1px solid #ddd;
+        text-align: left;
+      }
+      th {
+        background-color: #007bff;
+        color: white;
+      }
+      tr:nth-child(even) {
+        background-color: #f9f9f9;
+      }
+      .abierto {
+        color: green;
+        font-weight: bold;
+      }
+      .cerrado {
+        color: red;
+        font-weight: bold;
+      }
+      a {
+        color: #007bff;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🎫 Lista de Tickets</h1>
+
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Título</th>
+          <th>Estado</th>
+          <th>Prioridad</th>
+          <th>Acción</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% tickets.forEach(ticket => { %>
+        <tr>
+          <td><%= ticket.id %></td>
+          <td><%= ticket.titulo %></td>
+          <td class="<%= ticket.estado %>"><%= ticket.estado %></td>
+          <td><%= ticket.prioridad %></td>
+          <td><a href="/tickets/<%= ticket.id %>/ver">Ver detalle</a></td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </body>
+</html>
