@@ -11,19 +11,25 @@ app.set("views", path.join(__dirname, "../views"));
 const tickets = [
   {
     id: 1,
-    titulo: "Error en pantalla de login",
+    titulo: "Problema al procesar el pago con tarjeta",
     estado: "abierto",
     prioridad: "alta",
   },
   {
     id: 2,
-    titulo: "Lentitud en la carga de reporte",
+    titulo: "Actualizar foto de perfil de usuario",
     estado: "cerrado",
-    prioridad: "media",
+    prioridad: "baja",
   },
   {
     id: 3,
-    titulo: "Falta opción de exportar a PDF",
+    titulo: "Error 500 al descargar la factura",
+    estado: "abierto",
+    prioridad: "media",
+  },
+  {
+    id: 4,
+    titulo: "Sugerencia: agregar modo oscuro a la app",
     estado: "abierto",
     prioridad: "baja",
   },
