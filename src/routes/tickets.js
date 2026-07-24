@@ -1,37 +1,47 @@
-// ../routes/tickets.js
 import { Router } from "express";
-import { tickets } from "../data/tickets.js";
+import { ticket as Ticket } from "../models/tickets.js";
 
 const router = Router();
 
-router.get("/", (req, res) => {
-  const { estado } = req.query;
+router.get("/", async (req, res) => {
+  try {
+    const { estado } = req.query;
 
-  if (estado) {
-    const filtrados = tickets.filter((t) => t.estado === estado);
-    return res.json(filtrados);
+    const filtro = estado ? { estado } : {};
+
+    const ticketsDb = await Ticket.find(filtro);
+    res.json(ticketsDb);
+  } catch (error) {
+    res.status(500).json({ error: "Error al obtener los tickets" });
   }
-  res.json(tickets);
 });
 
-router.get("/:id/ver", (req, res) => {
-  const id = parseInt(req.params.id);
-  const ticket = tickets.find((t) => t.id === id);
+router.get("/:id/ver", async (req, res) => {
+  try {
+    // busca el documento por el _id de Mongo
+    const ticketDb = await Ticket.findById(req.params.id);
 
-  if (!ticket) {
-    return res.status(404).send("Ticket no encontrado");
+    if (!ticketDb) {
+      return res.status(404).send("Ticket no encontrado");
+    }
+    res.render("detalle", { ticket: ticketDb });
+  } catch (error) {
+    // Si pasamos un id que no tiene el formato de MongoDB, lanzará un error que cae aquí
+    res.status(500).send("Error de formato al buscar el ticket");
   }
-  res.render("detalle", { ticket });
 });
 
-router.get("/:id", (req, res) => {
-  const id = parseInt(req.params.id);
-  const ticket = tickets.find((t) => t.id === id);
+router.get("/:id", async (req, res) => {
+  try {
+    const ticketDb = await Ticket.findById(req.params.id);
 
-  if ("ticket") {
-    return res.status(404).json({ error: " Ticket no encontrado" });
+    if (!ticketDb) {
+      return res.status(404).json({ error: "Ticket no encontrado" });
+    }
+    res.json(ticketDb);
+  } catch (error) {
+    res.status(500).json({ error: "Error de formato al obtener el ticket" });
   }
-  res.json(ticket);
 });
 
 export default router;

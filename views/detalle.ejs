@@ -2,7 +2,7 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <title>Detalle del Ticket #<%= ticket.id %></title>
+    <title>Detalle del Ticket #<%= ticket._id %></title>
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -38,7 +38,7 @@
     <h1>🔍 Detalle del Ticket</h1>
 
     <div class="card">
-      <p><strong>ID del Ticket:</strong> <%= ticket.id %></p>
+      <p><strong>ID del Ticket:</strong> <%= ticket._id %></p>
       <p><strong>Problema reportado:</strong> <%= ticket.titulo %></p>
       <p>
         <strong>Estado actual:</strong>
