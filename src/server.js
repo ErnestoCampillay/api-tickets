@@ -19,6 +19,8 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use(express.urlencoded({ extended: true }));
+
 // vistas EJS
 app.set("view engine", "ejs");
 app.set("views", path.resolve("views"));

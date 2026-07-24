@@ -31,6 +31,27 @@ router.get("/:id/ver", async (req, res) => {
   }
 });
 
+router.get("/nuevo", (req, res) => {
+  res.render("nuevo");
+});
+
+router.post("/", async (req, res) => {
+  try {
+    const { titulo, estado, prioridad } = req.body;
+
+    await Ticket.create({
+      titulo,
+      estado,
+      prioridad,
+    });
+
+    res.redirect("/");
+  } catch (error) {
+    console.error("Error al guardar el ticket:", error);
+    res.status(500).send("Ocurrió un error al intentar crear el ticket.");
+  }
+});
+
 router.get("/:id", async (req, res) => {
   try {
     const ticketDb = await Ticket.findById(req.params.id);
