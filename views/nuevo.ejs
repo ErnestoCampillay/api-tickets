@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Crear Nuevo Ticket</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+      input,
+      select {
+        width: 100%;
+        padding: 8px;
+        max-width: 400px;
+        box-sizing: border-box;
+      }
+      .btn-submit {
+        background: #007bff;
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      .btn-volver {
+        margin-left: 10px;
+        text-decoration: none;
+        color: #333;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>📝 Crear Nuevo Ticket</h1>
+
+    <form action="/tickets" method="POST">
+      <div class="form-group">
+        <label for="titulo">Problema reportado (Título):</label>
+        <input type="text" id="titulo" name="titulo" required />
+      </div>
+
+      <div class="form-group">
+        <label for="estado">Estado:</label>
+        <select id="estado" name="estado">
+          <option value="abierto">Abierto</option>
+          <option value="en progreso">En Progreso</option>
+          <option value="cerrado">Cerrado</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="prioridad">Prioridad:</label>
+        <select id="prioridad" name="prioridad">
+          <option value="alta">Alta</option>
+          <option value="media" selected>Media</option>
+          <option value="baja">Baja</option>
+        </select>
+      </div>
+
+      <button type="submit" class="btn-submit">Guardar Ticket</button>
+      <a href="/" class="btn-volver">Cancelar</a>
+    </form>
+  </body>
+</html>

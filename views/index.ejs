@@ -12,6 +12,9 @@
 </head>
 <body>
     <h1>Listado de Tickets</h1>
+    <a href="/tickets/nuevo" style="display: inline-block; margin-bottom: 15px; padding: 10px; background: #28a745; color: white; text-decoration: none; border-radius: 5px;">
+        ➕ Crear Nuevo Ticket
+    </a>
     
     <table>
         <thead>
@@ -26,11 +29,11 @@
         <tbody>
             <% tickets.forEach(ticket => { %>
                 <tr>
-                    <td><%= ticket.id %></td>
+                    <td><%= ticket._id %></td>
                     <td><%= ticket.titulo %></td>
                     <td><%= ticket.estado %></td>
                     <td><%= ticket.prioridad %></td>
-                    <td><a href="/tickets/<%= ticket.id %>/ver">Ver Detalle</a></td>
+                    <td><a href="/tickets/<%= ticket._id %>/ver">Ver Detalle</a></td>
                 </tr>
             <% }) %>
         </tbody>
