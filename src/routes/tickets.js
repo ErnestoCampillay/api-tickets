@@ -1,67 +1,166 @@
+// API REST de tickets: CRUD completo en JSON.
+// Las vistas HTML viven en src/routes/vistas.js.
+
 import { Router } from "express";
-import { ticket as Ticket } from "../models/tickets.js";
+import mongoose from "mongoose";
+import { ticket as Ticket, ESTADOS, PRIORIDADES } from "../models/tickets.js";
+import { detallesDeValidacion } from "../middlewares/errores.js";
 
 const router = Router();
 
-router.get("/", async (req, res) => {
+const CAMPOS_ORDENABLES = ["titulo", "estado", "prioridad", "createdAt", "updatedAt"];
+const LIMITE_MAXIMO = 100;
+
+// GET /tickets -> listado con paginación, filtros y ordenación
+router.get("/", async (req, res, next) => {
   try {
-    const { estado } = req.query;
+    const { page = 1, limit = 10, estado, prioridad, sort = "-createdAt" } = req.query;
 
-    const filtro = estado ? { estado } : {};
+    const pagina = Number(page);
+    const porPagina = Number(limit);
 
-    const ticketsDb = await Ticket.find(filtro);
-    res.json(ticketsDb);
-  } catch (error) {
-    res.status(500).json({ error: "Error al obtener los tickets" });
-  }
-});
-
-router.get("/:id/ver", async (req, res) => {
-  try {
-    // busca el documento por el _id de Mongo
-    const ticketDb = await Ticket.findById(req.params.id);
-
-    if (!ticketDb) {
-      return res.status(404).send("Ticket no encontrado");
+    if (!Number.isInteger(pagina) || pagina < 1) {
+      return res.status(400).json({ error: "page debe ser un entero mayor o igual a 1" });
     }
-    res.render("detalle", { ticket: ticketDb });
+
+    if (!Number.isInteger(porPagina) || porPagina < 1 || porPagina > LIMITE_MAXIMO) {
+      return res
+        .status(400)
+        .json({ error: `limit debe ser un entero entre 1 y ${LIMITE_MAXIMO}` });
+    }
+
+    if (estado && !ESTADOS.includes(estado)) {
+      return res
+        .status(400)
+        .json({ error: `estado inválido. Valores permitidos: ${ESTADOS.join(", ")}` });
+    }
+
+    if (prioridad && !PRIORIDADES.includes(prioridad)) {
+      return res
+        .status(400)
+        .json({ error: `prioridad inválida. Valores permitidos: ${PRIORIDADES.join(", ")}` });
+    }
+
+    // sort admite "campo" (ascendente) o "-campo" (descendente)
+    const campoOrden = typeof sort === "string" ? sort.replace(/^-/, "") : "";
+    if (!CAMPOS_ORDENABLES.includes(campoOrden)) {
+      return res
+        .status(400)
+        .json({ error: `sort inválido. Campos permitidos: ${CAMPOS_ORDENABLES.join(", ")}` });
+    }
+
+    const filtro = {};
+    if (estado) filtro.estado = estado;
+    if (prioridad) filtro.prioridad = prioridad;
+
+    const [tickets, total] = await Promise.all([
+      Ticket.find(filtro)
+        .sort(sort)
+        .skip((pagina - 1) * porPagina)
+        .limit(porPagina),
+      Ticket.countDocuments(filtro),
+    ]);
+
+    res.json({ total, page: pagina, limit: porPagina, tickets });
   } catch (error) {
-    // Si pasamos un id que no tiene el formato de MongoDB, lanzará un error que cae aquí
-    res.status(500).send("Error de formato al buscar el ticket");
+    next(error);
   }
 });
 
-router.get("/nuevo", (req, res) => {
-  res.render("nuevo");
-});
-
-router.post("/", async (req, res) => {
+// GET /tickets/:id -> un ticket
+router.get("/:id", async (req, res, next) => {
   try {
-    const { titulo, estado, prioridad } = req.body;
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ error: "El id no tiene un formato válido de MongoDB" });
+    }
 
-    await Ticket.create({
-      titulo,
-      estado,
-      prioridad,
-    });
-
-    res.redirect("/");
-  } catch (error) {
-    console.error("Error al guardar el ticket:", error);
-    res.status(500).send("Ocurrió un error al intentar crear el ticket.");
-  }
-});
-
-router.get("/:id", async (req, res) => {
-  try {
     const ticketDb = await Ticket.findById(req.params.id);
 
     if (!ticketDb) {
       return res.status(404).json({ error: "Ticket no encontrado" });
     }
+
     res.json(ticketDb);
   } catch (error) {
-    res.status(500).json({ error: "Error de formato al obtener el ticket" });
+    next(error);
+  }
+});
+
+// POST /tickets -> crear
+router.post("/", async (req, res, next) => {
+  try {
+    const { titulo, estado, prioridad } = req.body;
+
+    const ticketNuevo = await Ticket.create({ titulo, estado, prioridad });
+
+    res.status(201).json(ticketNuevo);
+  } catch (error) {
+    // Datos mal enviados por el cliente: 400, no 500
+    if (error.name === "ValidationError") {
+      return res
+        .status(400)
+        .json({ error: "Datos inválidos", detalles: detallesDeValidacion(error) });
+    }
+    next(error);
+  }
+});
+
+// PATCH /tickets/:id -> actualizar parcialmente
+router.patch("/:id", async (req, res, next) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ error: "El id no tiene un formato válido de MongoDB" });
+    }
+
+    // Solo tocamos los campos que vengan en el cuerpo
+    const { titulo, estado, prioridad } = req.body;
+    const cambios = {};
+    if (titulo !== undefined) cambios.titulo = titulo;
+    if (estado !== undefined) cambios.estado = estado;
+    if (prioridad !== undefined) cambios.prioridad = prioridad;
+
+    if (Object.keys(cambios).length === 0) {
+      return res
+        .status(400)
+        .json({ error: "Envía al menos un campo: titulo, estado o prioridad" });
+    }
+
+    const ticketDb = await Ticket.findByIdAndUpdate(req.params.id, cambios, {
+      new: true, // devuelve el documento ya actualizado
+      runValidators: true, // vuelve a aplicar las validaciones del esquema
+    });
+
+    if (!ticketDb) {
+      return res.status(404).json({ error: "Ticket no encontrado" });
+    }
+
+    res.json(ticketDb);
+  } catch (error) {
+    if (error.name === "ValidationError") {
+      return res
+        .status(400)
+        .json({ error: "Datos inválidos", detalles: detallesDeValidacion(error) });
+    }
+    next(error);
+  }
+});
+
+// DELETE /tickets/:id -> eliminar
+router.delete("/:id", async (req, res, next) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ error: "El id no tiene un formato válido de MongoDB" });
+    }
+
+    const ticketDb = await Ticket.findByIdAndDelete(req.params.id);
+
+    if (!ticketDb) {
+      return res.status(404).json({ error: "Ticket no encontrado" });
+    }
+
+    res.status(204).end(); // éxito sin cuerpo
+  } catch (error) {
+    next(error);
   }
 });
 
