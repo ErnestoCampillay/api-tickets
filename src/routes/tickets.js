@@ -1,5 +1,4 @@
 // API REST de tickets: CRUD completo en JSON.
-// Las vistas HTML viven en src/routes/vistas.js.
 
 import { Router } from "express";
 import mongoose from "mongoose";
