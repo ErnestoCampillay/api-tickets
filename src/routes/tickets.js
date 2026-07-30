@@ -4,6 +4,7 @@ import { Router } from "express";
 import mongoose from "mongoose";
 import { ticket as Ticket, ESTADOS, PRIORIDADES } from "../models/tickets.js";
 import { detallesDeValidacion } from "../middlewares/errores.js";
+import { requireAuth, requireRol } from "../middlewares/auth.js";
 
 const router = Router();
 
@@ -86,7 +87,7 @@ router.get("/:id", async (req, res, next) => {
 });
 
 // POST /tickets -> crear
-router.post("/", async (req, res, next) => {
+router.post("/", requireAuth, async (req, res, next) => {
   try {
     const { titulo, estado, prioridad } = req.body;
 
@@ -105,7 +106,7 @@ router.post("/", async (req, res, next) => {
 });
 
 // PATCH /tickets/:id -> actualizar parcialmente
-router.patch("/:id", async (req, res, next) => {
+router.patch("/:id", requireAuth, async (req, res, next) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ error: "El id no tiene un formato válido de MongoDB" });
@@ -145,7 +146,7 @@ router.patch("/:id", async (req, res, next) => {
 });
 
 // DELETE /tickets/:id -> eliminar
-router.delete("/:id", async (req, res, next) => {
+router.delete("/:id", requireAuth, requireRol("admin"), async (req, res, next) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ error: "El id no tiene un formato válido de MongoDB" });
