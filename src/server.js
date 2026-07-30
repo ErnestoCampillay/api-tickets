@@ -2,6 +2,7 @@
 
 import express from "express";
 import ticketsRouter from "./routes/tickets.js";
+import authRouter from "./routes/auth.js";
 import { conectarDB } from "./data/db.js";
 import { noEncontrado, manejadorErrores } from "./middlewares/errores.js";
 
@@ -26,9 +27,12 @@ app.get("/", (req, res) =>
   }),
 );
 
-// Endpoints
+// Salud del server
 app.get("/health", (req, res) => res.json({ status: "ok" }));
 app.get("/version", (req, res) => res.json({ version: "1.0.0" }));
+
+// Routers
+app.use("/auth", authRouter);
 app.use("/tickets", ticketsRouter);
 
 // Errores
