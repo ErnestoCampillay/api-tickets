@@ -2,7 +2,7 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <title>Crear Nuevo Ticket</title>
+    <title>Editar Ticket</title>
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -51,11 +51,12 @@
     </style>
   </head>
   <body>
-    <h1>📝 Crear Nuevo Ticket</h1>
+    <h1>✏️ Editar Ticket</h1>
+    <p><strong>ID:</strong> <%= ticket._id %></p>
 
     <% if (errores.length > 0) { %>
       <div class="errores">
-        <strong>No se pudo guardar el ticket (400):</strong>
+        <strong>No se pudo actualizar el ticket (400):</strong>
         <ul>
           <% errores.forEach(mensaje => { %>
             <li><%= mensaje %></li>
@@ -64,23 +65,17 @@
       </div>
     <% } %>
 
-    <form action="/tickets/nuevo" method="POST">
+    <form action="/tickets/<%= ticket._id %>/editar" method="POST">
       <div class="form-group">
         <label for="titulo">Problema reportado (Título):</label>
-        <input
-          type="text"
-          id="titulo"
-          name="titulo"
-          value="<%= valores.titulo || '' %>"
-          required
-        />
+        <input type="text" id="titulo" name="titulo" value="<%= ticket.titulo %>" required />
       </div>
 
       <div class="form-group">
         <label for="estado">Estado:</label>
         <select id="estado" name="estado">
           <% estados.forEach(estado => { %>
-            <option value="<%= estado %>" <%= valores.estado === estado ? "selected" : "" %>>
+            <option value="<%= estado %>" <%= ticket.estado === estado ? "selected" : "" %>>
               <%= estado %>
             </option>
           <% }) %>
@@ -93,7 +88,7 @@
           <% prioridades.forEach(prioridad => { %>
             <option
               value="<%= prioridad %>"
-              <%= (valores.prioridad || "media") === prioridad ? "selected" : "" %>
+              <%= ticket.prioridad === prioridad ? "selected" : "" %>
             >
               <%= prioridad %>
             </option>
@@ -101,7 +96,7 @@
         </select>
       </div>
 
-      <button type="submit" class="btn-submit">Guardar Ticket</button>
+      <button type="submit" class="btn-submit">Guardar cambios</button>
       <a href="/" class="btn-volver">Cancelar</a>
     </form>
   </body>
