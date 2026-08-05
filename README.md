@@ -1,7 +1,7 @@
 # API de Tickets
 
 API REST de tickets con Express 5, Mongoose y autenticación con JWT.
-Corresponde a los módulos 5 y 6 del curso Desarrollo Backend con Node.js.
+Corresponde a los módulos 5 a 8 del curso Desarrollo Backend con Node.js.
 
 ## Puesta en marcha
 
@@ -149,6 +149,27 @@ curl -i -X DELETE http://localhost:3000/tickets/<id> \
   -H "Authorization: Bearer $TOKEN"
 ```
 
+## Tiempo real (Socket.IO)
+
+La API emite eventos cuando cambian los tickets. El WebSocket **no sustituye a la API REST**: solo avisa, la verdad sigue en la base de datos.
+
+| Evento               | Cuándo               | Destinatario  |
+| -------------------- | -------------------- | ------------- |
+| `bienvenida`         | Al conectar          | Ese cliente   |
+| `ticket:creado`      | `POST /tickets`      | Todos         |
+| `ticket:confirmado`  | `POST /tickets`      | Solo el autor |
+| `ticket:actualizado` | `PATCH /tickets/:id` | Todos         |
+
+El socket se autentica con **el mismo JWT** que la API, enviado en el handshake. Sin token válido la conexión se rechaza con `connect_error`:
+
+```js
+const socket = io({ auth: { token: "eyJhbGciOi..." } });
+```
+
+Cada conexión entra a la sala `usuario:<id>`, tomada del token firmado y no de lo que diga el cliente.
+
+Esto es una API: no sirve ninguna página. Para ver los eventos, usa una petición **Socket.IO** en Postman contra `http://localhost:3000`, con el token en el handshake (`auth.token`), y suscríbete a los cuatro eventos de la tabla.
+
 ## Colección de pruebas
 
 `postman/API-Tickets.postman_collection.json` — impórtala en Postman o Insomnia.
@@ -164,20 +185,35 @@ La colección manda `Authorization: Bearer {{token}}` heredado en todos los requ
 
 *Login admin* necesita un usuario con rol `admin`: regístralo primero y cámbiale el rol en la base, porque la API no permite autoconcederse permisos.
 
+## Seguridad
+
+`app.use(helmet())` fija las cabeceras que mitigan clickjacking, sniffing y ataques parecidos. Es lo primero que se registra en `src/app.js`, porque un middleware solo protege lo que viene detrás de él.
+
+Ningún endpoint devuelve datos sensibles: `passwordHash` es `select: false` en el esquema, y el manejador central de errores registra el stack en el servidor pero responde un mensaje genérico al cliente.
+
+Los secretos viven en el entorno: `.env` está en el `.gitignore` y `.env.example` solo lleva valores de ejemplo.
+
 ## Estructura
 
 ```
 src/
-  server.js              # app, middlewares y arranque
-  data/db.js             # conexión a MongoDB
-  models/tickets.js      # esquema de Ticket + validaciones
-  models/usuarios.js     # esquema de Usuario + roles
-  routes/tickets.js      # API REST de tickets
-  routes/auth.js         # registro, login y /auth/yo
-  middlewares/errores.js # 404 y manejador central de errores
-  middlewares/auth.js    # firmarToken, requireAuth y requireRol
-postman/                 # colección de pruebas
+  app.js                             # la app de Express: middlewares y routers
+  server.js                          # arranque: servidor HTTP, Socket.IO y listen
+  data/db.js                         # conexión a MongoDB
+  models/tickets.js                  # esquema de Ticket + validaciones
+  models/usuarios.js                 # esquema de Usuario + roles
+  routes/tickets.js                  # URL + método -> controlador
+  routes/auth.js                     # registro, login y /auth/yo
+  controllers/tickets.controller.js  # lee req, responde res
+  services/tickets.service.js        # el único que habla con el modelo
+  middlewares/errores.js             # 404 y manejador central de errores
+  middlewares/auth.js                # firmarToken, requireAuth y requireRol
+postman/                             # colección de pruebas
 ```
+
+Las capas van en una sola dirección: **ruta → controlador → servicio → modelo**. El servicio no conoce `req` ni `res`, y por eso los `io.emit` viven en el controlador: a `io` se llega por `req.app`.
+
+`routes/auth.js` todavía no está separado en capas — es el reto del Módulo 8.
 
 ## Scripts
 

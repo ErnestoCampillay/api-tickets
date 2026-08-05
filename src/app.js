@@ -10,6 +10,7 @@ import { noEncontrado, manejadorErrores } from "./middlewares/errores.js";
 const app = express();
 const APP_NAME = process.env.APP_NAME || "API de Tickets";
 
+// Cabeceras de seguridad. Va lo primero: un middleware solo protege lo que viene detrás.
 app.use(helmet());
 
 app.use(express.json());
