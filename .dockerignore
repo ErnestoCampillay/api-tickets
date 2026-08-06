@@ -1,0 +1,16 @@
+# Lo que NO entra en la imagen. Los secretos, los primeros.
+.env
+.env.test
+
+node_modules
+dist
+.git
+.gitignore
+
+# No hacen falta para ejecutar la API
+tests
+docs
+postman
+README.md
+webpack.config.js
+babel.config.json
