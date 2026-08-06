@@ -1,0 +1,12 @@
+# ==============================================================================
+# CODEOWNERS de ejemplo — renómbralo a `CODEOWNERS` para activarlo.
+# GitHub solicitará revisión automática de los dueños en cada PR que toque
+# sus rutas. Ver https://docs.github.com/articles/about-code-owners
+# ==============================================================================
+
+# Dueño por defecto de todo el repositorio.
+* @ernestocampillay
+
+# Dueños por área (ejemplos — ajusta o elimina).
+# docs/           @ernestocampillay
+# .github/        @ernestocampillay
